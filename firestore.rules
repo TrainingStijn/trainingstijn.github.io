@@ -1,0 +1,14 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Elke gebruiker heeft één document met een geheime code van 20 tekens als naam.
+    // Wie de code niet kent, kan niets lezen; lijsten opvragen of verwijderen kan niet.
+    match /trainers/{code} {
+      allow get: if code.matches('^[A-Z0-9]{20}$');
+      allow create, update: if code.matches('^[A-Z0-9]{20}$')
+        && request.resource.data.keys().hasOnly(['name', 'weights', 'history', 'cur', 'updatedAt'])
+        && request.resource.data.updatedAt is int;
+      allow list, delete: if false;
+    }
+  }
+}
